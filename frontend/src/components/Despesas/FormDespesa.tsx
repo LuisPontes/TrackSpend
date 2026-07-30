@@ -1,12 +1,21 @@
 import { type FormEvent, useEffect, useState } from "react";
-import type { Categoria, TipoDespesa } from "../../types";
+import type { Categoria, MembroGrupo, TipoDespesa } from "../../types";
 import * as categoriasService from "../../services/categoriasService";
 import * as despesasService from "../../services/despesasService";
 import { useNotificacoes } from "../../hooks/useNotificacoes";
+import { useAuth } from "../../hooks/useAuth";
 
 const CORES = ["#f97316", "#0ea5e9", "#22c55e", "#a855f7", "#ef4444", "#64748b"];
 
-export function FormDespesa({ grupoId, aoCriar }: { grupoId: string; aoCriar: () => void }) {
+interface Props {
+  grupoId: string;
+  aoCriar: () => void;
+  membros: MembroGrupo[];
+  permitirDespesaEmNomeOutro: boolean;
+}
+
+export function FormDespesa({ grupoId, aoCriar, membros, permitirDespesaEmNomeOutro }: Props) {
+  const { usuario } = useAuth();
   const { recarregar: recarregarNotificacoes } = useNotificacoes();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoria, setCategoria] = useState("");
@@ -15,6 +24,7 @@ export function FormDespesa({ grupoId, aoCriar }: { grupoId: string; aoCriar: ()
   const [valor, setValor] = useState("");
   const [data, setData] = useState(() => new Date().toISOString().slice(0, 10));
   const [descricao, setDescricao] = useState("");
+  const [quemGastou, setQuemGastou] = useState(() => usuario?.id ?? "");
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
 
@@ -48,6 +58,7 @@ export function FormDespesa({ grupoId, aoCriar }: { grupoId: string; aoCriar: ()
         valor: Number(valor),
         data,
         descricao: descricao || undefined,
+        usuarioId: permitirDespesaEmNomeOutro ? quemGastou : undefined,
       });
 
       if (notificacao) {
@@ -91,6 +102,22 @@ export function FormDespesa({ grupoId, aoCriar }: { grupoId: string; aoCriar: ()
         ))}
         <option value="__nova__">+ Nova categoria</option>
       </select>
+
+      {permitirDespesaEmNomeOutro && (
+        <select
+          value={quemGastou}
+          onChange={(e) => setQuemGastou(e.target.value)}
+          required
+          className="col-span-2 rounded border border-slate-300 px-2 py-2 text-sm min-h-11 md:col-span-2"
+          aria-label="Quem gastou?"
+        >
+          {membros.map((m) => (
+            <option key={m._id} value={m._id}>
+              Quem gastou: {m.nome}
+            </option>
+          ))}
+        </select>
+      )}
 
       {categoria === "__nova__" && (
         <input

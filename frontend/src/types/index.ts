@@ -13,6 +13,10 @@ export interface MembroGrupo {
   email: string;
 }
 
+export interface GrupoSettings {
+  permitirDespesaEmNomeOutro: boolean;
+}
+
 export interface Grupo {
   _id: string;
   nome: string;
@@ -20,6 +24,7 @@ export interface Grupo {
   criadorId: string;
   membros: MembroGrupo[];
   moeda: string;
+  settings: GrupoSettings;
   criadoEm: string;
 }
 
@@ -27,6 +32,7 @@ export interface Despesa {
   _id: string;
   grupoId: string;
   usuarioId: string;
+  adicionadoPor?: string;
   categoria: string;
   tipo: TipoDespesa;
   valor: number;

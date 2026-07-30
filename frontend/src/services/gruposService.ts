@@ -29,3 +29,11 @@ export async function editarGrupo(grupoId: string, dados: { nome?: string; descr
 export async function eliminarGrupo(grupoId: string): Promise<void> {
   await api.delete(`/grupos/${grupoId}`);
 }
+
+export async function atualizarSettings(
+  grupoId: string,
+  settings: { permitirDespesaEmNomeOutro?: boolean }
+): Promise<Grupo> {
+  const { data } = await api.patch<{ grupo: Grupo }>(`/grupos/${grupoId}/settings`, settings);
+  return data.grupo;
+}

@@ -1,11 +1,16 @@
-import type { Despesa } from "../../types";
+import type { Despesa, MembroGrupo } from "../../types";
 
 interface Props {
   despesas: Despesa[];
+  membros: MembroGrupo[];
   aoRemover: (id: string) => void;
 }
 
-export function ListaDespesas({ despesas, aoRemover }: Props) {
+function nomeDe(membros: MembroGrupo[], id: string): string {
+  return membros.find((m) => m._id === id)?.nome ?? id.slice(-4);
+}
+
+export function ListaDespesas({ despesas, membros, aoRemover }: Props) {
   if (despesas.length === 0) {
     return <p className="text-sm text-slate-500">Sem despesas neste período.</p>;
   }
@@ -18,6 +23,7 @@ export function ListaDespesas({ despesas, aoRemover }: Props) {
             <th className="py-2">Data</th>
             <th>Categoria</th>
             <th>Tipo</th>
+            <th>Quem gastou</th>
             <th>Descrição</th>
             <th className="text-right">Valor</th>
             <th />
@@ -29,6 +35,12 @@ export function ListaDespesas({ despesas, aoRemover }: Props) {
               <td className="py-2">{new Date(despesa.data).toLocaleDateString("pt-PT")}</td>
               <td>{despesa.categoria}</td>
               <td>{despesa.tipo === "FIXA" ? "Fixa" : "Variável"}</td>
+              <td>
+                <span className="font-medium">{nomeDe(membros, despesa.usuarioId)}</span>
+                {despesa.adicionadoPor && despesa.adicionadoPor !== despesa.usuarioId && (
+                  <span className="text-xs text-slate-500"> (registado por {nomeDe(membros, despesa.adicionadoPor)})</span>
+                )}
+              </td>
               <td className="text-slate-500">{despesa.descricao}</td>
               <td className="text-right font-medium">{despesa.valor.toFixed(2)} €</td>
               <td className="text-right">
@@ -61,6 +73,17 @@ export function ListaDespesas({ despesas, aoRemover }: Props) {
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Tipo</span>
               <span>{despesa.tipo === "FIXA" ? "Fixa" : "Variável"}</span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span className="text-slate-500">Quem gastou</span>
+              <span className="text-right">
+                {nomeDe(membros, despesa.usuarioId)}
+                {despesa.adicionadoPor && despesa.adicionadoPor !== despesa.usuarioId && (
+                  <span className="block text-xs text-slate-500">
+                    registado por {nomeDe(membros, despesa.adicionadoPor)}
+                  </span>
+                )}
+              </span>
             </div>
             {despesa.descricao && (
               <div className="flex justify-between py-1">

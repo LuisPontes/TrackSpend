@@ -18,7 +18,13 @@
       "Bash(lsof -i:4000)",
       "Bash(echo \"EXIT:$?\")",
       "Bash(lsof -i :5173 -sTCP:LISTEN -n -P)",
-      "Bash(ps -p 53818 -o pid,ppid,command)"
+      "Bash(ps -p 53818 -o pid,ppid,command)",
+      "Bash(lsof -nP -iTCP -sTCP:LISTEN)",
+      "Bash(ps -p 57702 -o pid,ppid,lstart,command)",
+      "Bash(kill 57702)",
+      "Bash(lsof -i :4000 -sTCP:LISTEN -n -P)",
+      "Bash(git status *)",
+      "Bash(cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.local.json 2>/dev/null; echo \"---\"; cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.json 2>/dev/null; echo \"---global---\"; cat ~/.claude/settings.json 2>/dev/null | head -100)"
     ]
   }
 }

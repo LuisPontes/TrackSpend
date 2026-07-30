@@ -92,6 +92,22 @@ export async function eliminar(req: Request, res: Response) {
   res.status(204).send();
 }
 
+export async function atualizarSettings(req: Request, res: Response) {
+  const grupo = req.grupo!;
+
+  if (grupo.criadorId.toString() !== req.auth?.userId) {
+    throw new AppError("Só quem criou o grupo pode alterar as definições", 403);
+  }
+
+  const { permitirDespesaEmNomeOutro } = req.body as { permitirDespesaEmNomeOutro?: boolean };
+  if (permitirDespesaEmNomeOutro !== undefined) {
+    grupo.settings.permitirDespesaEmNomeOutro = permitirDespesaEmNomeOutro;
+  }
+
+  await grupo.save();
+  res.json({ grupo });
+}
+
 export async function removerMembro(req: Request, res: Response) {
   const grupo = req.grupo!;
   const { usuarioId } = req.params;

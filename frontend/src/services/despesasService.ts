@@ -14,6 +14,7 @@ export interface NovaDespesa {
   valor: number;
   data: string;
   descricao?: string;
+  usuarioId?: string;
 }
 
 export async function listarDespesas(grupoId: string, filtros: FiltrosDespesas = {}): Promise<Despesa[]> {

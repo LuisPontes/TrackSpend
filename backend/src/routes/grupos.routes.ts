@@ -9,6 +9,7 @@ import {
   eliminar,
   adicionarMembro,
   removerMembro,
+  atualizarSettings,
 } from "../controllers/gruposController";
 
 const router = Router();
@@ -19,6 +20,7 @@ router.get("/", listar);
 router.post("/", criar);
 router.get("/:grupoId", requireGrupoMembro, obter);
 router.put("/:grupoId", requireGrupoMembro, editar);
+router.patch("/:grupoId/settings", requireGrupoMembro, atualizarSettings);
 router.delete("/:grupoId", requireGrupoMembro, eliminar);
 router.post("/:grupoId/membros", requireGrupoMembro, adicionarMembro);
 router.delete("/:grupoId/membros/:usuarioId", requireGrupoMembro, removerMembro);

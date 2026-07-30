@@ -4,6 +4,7 @@ import { TipoDespesa } from "./Categoria";
 export interface IDespesa extends Document {
   grupoId: Types.ObjectId;
   usuarioId: Types.ObjectId;
+  adicionadoPor?: Types.ObjectId;
   categoria: string;
   tipo: TipoDespesa;
   valor: number;
@@ -19,6 +20,7 @@ const despesaSchema = new Schema<IDespesa>(
   {
     grupoId: { type: Schema.Types.ObjectId, ref: "Grupo", required: true, index: true },
     usuarioId: { type: Schema.Types.ObjectId, ref: "Usuario", required: true },
+    adicionadoPor: { type: Schema.Types.ObjectId, ref: "Usuario" },
     categoria: { type: String, required: true, trim: true },
     tipo: { type: String, enum: ["FIXA", "VARIAVEL"], required: true },
     valor: { type: Number, required: true, min: 0 },

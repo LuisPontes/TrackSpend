@@ -8,7 +8,7 @@ import { ListaDespesas } from "../components/Despesas/ListaDespesas";
 import { Filtros } from "../components/Dashboard/Filtros";
 
 export function DespesasPage() {
-  const { grupoId } = useGrupo();
+  const { grupoId, grupo } = useGrupo();
   const agora = new Date();
   const [mes, setMes] = useState(agora.getMonth() + 1);
   const [ano, setAno] = useState(agora.getFullYear());
@@ -31,13 +31,20 @@ export function DespesasPage() {
         <Filtros mes={mes} ano={ano} anosDisponiveis={anosDisponiveis} aoMudarMes={setMes} aoMudarAno={setAno} />
       </div>
 
-      <FormDespesa grupoId={grupoId} aoCriar={recarregar} />
+      {grupo && (
+        <FormDespesa
+          grupoId={grupoId}
+          aoCriar={recarregar}
+          membros={grupo.membros}
+          permitirDespesaEmNomeOutro={grupo.settings.permitirDespesaEmNomeOutro}
+        />
+      )}
 
       <div className="rounded-lg border border-slate-200 bg-white p-4">
-        {carregando || !despesas ? (
+        {carregando || !despesas || !grupo ? (
           <p className="text-sm text-slate-500">A carregar...</p>
         ) : (
-          <ListaDespesas despesas={despesas} aoRemover={handleRemover} />
+          <ListaDespesas despesas={despesas} membros={grupo.membros} aoRemover={handleRemover} />
         )}
       </div>
     </div>

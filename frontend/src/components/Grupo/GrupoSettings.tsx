@@ -16,8 +16,19 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
   const [novoNome, setNovoNome] = useState(grupo.nome);
   const [aGuardarNome, setAGuardarNome] = useState(false);
   const [erroNome, setErroNome] = useState<string | null>(null);
+  const [aGuardarPermissao, setAGuardarPermissao] = useState(false);
 
   const souCriador = grupo.criadorId === usuario?.id;
+
+  async function handleTogglePermitirDespesaEmNomeOutro(valor: boolean) {
+    setAGuardarPermissao(true);
+    try {
+      await gruposService.atualizarSettings(grupo._id, { permitirDespesaEmNomeOutro: valor });
+      aoAtualizar();
+    } finally {
+      setAGuardarPermissao(false);
+    }
+  }
 
   async function handleRenomear(event: FormEvent) {
     event.preventDefault();
@@ -153,6 +164,22 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
         </form>
         {erro && <p className="mt-2 text-sm text-red-600">{erro}</p>}
       </div>
+
+      {souCriador && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <h3 className="mb-3 text-sm font-semibold text-slate-700">Despesas em nome de outro membro</h3>
+          <label className="flex min-h-11 items-center gap-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={grupo.settings.permitirDespesaEmNomeOutro}
+              disabled={aGuardarPermissao}
+              onChange={(e) => handleTogglePermitirDespesaEmNomeOutro(e.target.checked)}
+              className="h-5 w-5"
+            />
+            Permitir que membros registem despesas em nome de outro membro do grupo
+          </label>
+        </div>
+      )}
 
       {souCriador && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-6">

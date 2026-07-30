@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Despesa } from "../models/Despesa";
 import { Orcamento } from "../models/Orcamento";
 import { Notificacao } from "../models/Notificacao";
+import { Usuario } from "../models/Usuario";
 import { AppError } from "../middleware/errorHandler";
 import { requireFields } from "../utils/validators";
 import { normalizarCategoria } from "../utils/categorias";
@@ -43,6 +44,23 @@ async function notificarSeUltrapassouOrcamento(despesa: InstanceType<typeof Desp
   );
 }
 
+/**
+ * Se a despesa foi registada por alguém em nome de outro membro, avisa quem
+ * "gastou" — quem a registou pode não ser quem tem de acertar contas por ela.
+ */
+async function notificarSeEmNomeDeOutro(despesa: InstanceType<typeof Despesa>) {
+  if (!despesa.adicionadoPor) return;
+
+  const quemAdicionou = await Usuario.findById(despesa.adicionadoPor).select("nome");
+  await Notificacao.create({
+    grupoId: despesa.grupoId,
+    memberId: despesa.usuarioId,
+    tipo: "despesa_em_meu_nome",
+    despesaId: despesa._id,
+    mensagem: `${quemAdicionou?.nome ?? "Alguém"} registou uma despesa de €${despesa.valor.toFixed(2)} em teu nome`,
+  });
+}
+
 export async function listar(req: Request, res: Response) {
   const { grupoId } = req.params;
   const { mes, ano, categoria, tipo } = req.query as Record<string, string | undefined>;
@@ -64,12 +82,13 @@ export async function listarAnos(req: Request, res: Response) {
 
 export async function criar(req: Request, res: Response) {
   requireFields(req.body, ["categoria", "tipo", "valor", "data"]);
-  const { tipo, valor, data, descricao } = req.body as {
+  const { tipo, valor, data, descricao, usuarioId } = req.body as {
     categoria: string;
     tipo: string;
     valor: number;
     data: string;
     descricao?: string;
+    usuarioId?: string;
   };
   const categoria = normalizarCategoria(req.body.categoria as string);
 
@@ -78,9 +97,24 @@ export async function criar(req: Request, res: Response) {
     throw new AppError("Data inválida", 422);
   }
 
+  const adicionadoPorId = req.auth?.userId as string;
+  const grupo = req.grupo!;
+  let quemGastouId = adicionadoPorId;
+
+  if (usuarioId && usuarioId !== adicionadoPorId) {
+    if (!grupo.settings.permitirDespesaEmNomeOutro) {
+      throw new AppError("Este grupo não permite registar despesas em nome de outro membro", 400);
+    }
+    if (!grupo.membros.some((id) => id.toString() === usuarioId)) {
+      throw new AppError("Esse utilizador não é membro deste grupo", 422);
+    }
+    quemGastouId = usuarioId;
+  }
+
   const despesa = await Despesa.create({
     grupoId: req.params.grupoId,
-    usuarioId: req.auth?.userId,
+    usuarioId: quemGastouId,
+    adicionadoPor: quemGastouId !== adicionadoPorId ? adicionadoPorId : undefined,
     categoria,
     tipo,
     valor,
@@ -90,7 +124,10 @@ export async function criar(req: Request, res: Response) {
     descricao,
   });
 
-  const notificacao = await notificarSeUltrapassouOrcamento(despesa, req.auth?.userId as string);
+  const [notificacao] = await Promise.all([
+    notificarSeUltrapassouOrcamento(despesa, adicionadoPorId),
+    notificarSeEmNomeDeOutro(despesa),
+  ]);
 
   res.status(201).json({ despesa, notificacao });
 }
