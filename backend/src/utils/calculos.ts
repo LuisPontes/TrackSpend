@@ -86,8 +86,12 @@ export function calcularDashboard(
   aplicarPrevisto(fixas, orcamento, "FIXA");
   aplicarPrevisto(variaveis, orcamento, "VARIAVEL");
 
-  const totalFixas = fixas.reduce((soma, linha) => soma + linha.total, 0);
-  const totalVariaveis = variaveis.reduce((soma, linha) => soma + linha.total, 0);
+  // Categorias orçamentadas mas sem despesas no mês não interessam na tabela.
+  const fixasComGasto = fixas.filter((linha) => linha.total > 0);
+  const variaveisComGasto = variaveis.filter((linha) => linha.total > 0);
+
+  const totalFixas = fixasComGasto.reduce((soma, linha) => soma + linha.total, 0);
+  const totalVariaveis = variaveisComGasto.reduce((soma, linha) => soma + linha.total, 0);
 
   const porPessoa: ResumoUsuario = {};
   for (const despesa of despesas) {
@@ -100,8 +104,8 @@ export function calcularDashboard(
   const transferencias = calcularTransferencias(saldos);
 
   return {
-    fixas,
-    variaveis,
+    fixas: fixasComGasto,
+    variaveis: variaveisComGasto,
     resumo: {
       totalFixas,
       totalVariaveis,

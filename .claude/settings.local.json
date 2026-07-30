@@ -24,7 +24,8 @@
       "Bash(kill 57702)",
       "Bash(lsof -i :4000 -sTCP:LISTEN -n -P)",
       "Bash(git status *)",
-      "Bash(cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.local.json 2>/dev/null; echo \"---\"; cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.json 2>/dev/null; echo \"---global---\"; cat ~/.claude/settings.json 2>/dev/null | head -100)"
+      "Bash(cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.local.json 2>/dev/null; echo \"---\"; cat /Users/lpontes/PersonalWorkSpaceJava/TrackSpend/.claude/settings.json 2>/dev/null; echo \"---global---\"; cat ~/.claude/settings.json 2>/dev/null | head -100)",
+      "Bash(curl -s http://localhost:4000/api/usuarios -o /dev/null -w \"%{http_code}\\\\n\")"
     ]
   }
 }

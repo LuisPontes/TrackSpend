@@ -14,6 +14,7 @@ import orcamentosRoutes from "./routes/orcamentos.routes";
 import acertosRoutes from "./routes/acertos.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import notificacoesRoutes from "./routes/notificacoes.routes";
+import usuariosRoutes from "./routes/usuarios.routes";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/grupos", gruposRoutes);
 app.use("/api/grupos/:grupoId/despesas", despesasRoutes);
 app.use("/api/grupos/:grupoId/categorias", categoriasRoutes);

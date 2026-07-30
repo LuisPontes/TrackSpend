@@ -1,7 +1,8 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Grupo } from "../../types";
+import type { Grupo, MembroGrupo } from "../../types";
 import * as gruposService from "../../services/gruposService";
+import * as usuariosService from "../../services/usuariosService";
 import { useAuth } from "../../hooks/useAuth";
 
 export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualizar: () => void }) {
@@ -10,6 +11,8 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
   const [email, setEmail] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [usuarios, setUsuarios] = useState<MembroGrupo[]>([]);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
   const [aEliminar, setAEliminar] = useState(false);
   const [erroEliminar, setErroEliminar] = useState<string | null>(null);
   const [editandoNome, setEditandoNome] = useState(false);
@@ -19,6 +22,25 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
   const [aGuardarPermissao, setAGuardarPermissao] = useState(false);
 
   const souCriador = grupo.criadorId === usuario?.id;
+
+  useEffect(() => {
+    usuariosService.listarUsuarios().then(setUsuarios);
+  }, []);
+
+  const jaMembro = new Set(grupo.membros.map((m) => m._id));
+  const sugestoes = usuarios
+    .filter((u) => !jaMembro.has(u._id) && u._id !== usuario?.id)
+    .filter(
+      (u) =>
+        email.trim() === "" ||
+        u.nome.toLowerCase().includes(email.toLowerCase()) ||
+        u.email.toLowerCase().includes(email.toLowerCase())
+    );
+
+  function handleSelecionarSugestao(u: MembroGrupo) {
+    setEmail(u.email);
+    setMostrarSugestoes(false);
+  }
 
   async function handleTogglePermitirDespesaEmNomeOutro(valor: boolean) {
     setAGuardarPermissao(true);
@@ -146,14 +168,37 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
       <div className="rounded-lg border border-slate-200 bg-white p-6">
         <h3 className="mb-3 text-sm font-semibold text-slate-700">Adicionar membro</h3>
         <form onSubmit={handleAdicionarMembro} className="flex gap-2">
-          <input
-            type="email"
-            required
-            placeholder="email@exemplo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="min-h-11 flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
-          />
+          <div className="relative flex-1">
+            <input
+              type="email"
+              required
+              placeholder="email@exemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setMostrarSugestoes(true)}
+              onBlur={() => setTimeout(() => setMostrarSugestoes(false), 150)}
+              className="min-h-11 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            {mostrarSugestoes && sugestoes.length > 0 && (
+              <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                {sugestoes.map((u) => (
+                  <li key={u._id}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSelecionarSugestao(u);
+                      }}
+                      className="block w-full min-h-11 px-3 py-2 text-left text-sm hover:bg-slate-100"
+                    >
+                      <span className="font-medium">{u.nome}</span>{" "}
+                      <span className="text-slate-500">{u.email}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <button
             type="submit"
             disabled={enviando}
