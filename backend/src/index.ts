@@ -13,6 +13,7 @@ import categoriasRoutes from "./routes/categorias.routes";
 import orcamentosRoutes from "./routes/orcamentos.routes";
 import acertosRoutes from "./routes/acertos.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import notificacoesRoutes from "./routes/notificacoes.routes";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/grupos/:grupoId/categorias", categoriasRoutes);
 app.use("/api/grupos/:grupoId/orcamentos", orcamentosRoutes);
 app.use("/api/grupos/:grupoId/acertos", acertosRoutes);
 app.use("/api/grupos/:grupoId/dashboard", dashboardRoutes);
+app.use("/api/grupos/:grupoId/notificacoes", notificacoesRoutes);
 
 app.use(errorHandler);
 

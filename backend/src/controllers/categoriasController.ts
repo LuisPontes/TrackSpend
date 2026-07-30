@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Categoria } from "../models/Categoria";
 import { AppError } from "../middleware/errorHandler";
 import { requireFields } from "../utils/validators";
-import { capitalizarInicial } from "../utils/texto";
+import { normalizarCategoria } from "../utils/categorias";
 
 export async function listar(req: Request, res: Response) {
   const categorias = await Categoria.find({ grupoId: req.params.grupoId, ativo: true }).sort({ nome: 1 });
@@ -12,7 +12,7 @@ export async function listar(req: Request, res: Response) {
 export async function criar(req: Request, res: Response) {
   requireFields(req.body, ["nome", "tipo"]);
   const { tipo, cor } = req.body as { nome: string; tipo: string; cor?: string };
-  const nome = capitalizarInicial(req.body.nome as string);
+  const nome = normalizarCategoria(req.body.nome as string);
 
   const existente = await Categoria.findOne({ grupoId: req.params.grupoId, nome });
   if (existente) {
@@ -36,7 +36,7 @@ export async function editar(req: Request, res: Response) {
     ativo: boolean;
   }>;
 
-  if (nome !== undefined) categoria.nome = capitalizarInicial(nome);
+  if (nome !== undefined) categoria.nome = normalizarCategoria(nome);
   if (tipo !== undefined) categoria.tipo = tipo as typeof categoria.tipo;
   if (cor !== undefined) categoria.cor = cor;
   if (ativo !== undefined) categoria.ativo = ativo;

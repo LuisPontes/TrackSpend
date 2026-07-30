@@ -78,6 +78,24 @@ export interface Acerto {
   dataPagamento?: string;
 }
 
+export type TipoNotificacao = "orcamento_ultrapassado" | "despesa_em_meu_nome";
+
+export interface Notificacao {
+  _id: string;
+  grupoId: string;
+  memberId: string;
+  tipo: TipoNotificacao;
+  categoria?: string;
+  mes?: string;
+  orcamentoPrevisao?: number;
+  gastoReal?: number;
+  excesso?: number;
+  despesaId?: string;
+  mensagem?: string;
+  lido: boolean;
+  criadoEm: string;
+}
+
 export interface LinhaCategoriaDashboard {
   categoria: string;
   porUsuario: Record<string, number>;

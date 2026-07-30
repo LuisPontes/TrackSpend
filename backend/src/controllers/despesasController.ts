@@ -1,8 +1,47 @@
 import { Request, Response } from "express";
 import { Despesa } from "../models/Despesa";
+import { Orcamento } from "../models/Orcamento";
+import { Notificacao } from "../models/Notificacao";
 import { AppError } from "../middleware/errorHandler";
 import { requireFields } from "../utils/validators";
-import { capitalizarInicial } from "../utils/texto";
+import { normalizarCategoria } from "../utils/categorias";
+
+/**
+ * Se a despesa fizer a categoria ultrapassar o orçamento do mês, cria (ou
+ * atualiza, se já houver uma por ler) uma notificação para quem a registou.
+ */
+async function notificarSeUltrapassouOrcamento(despesa: InstanceType<typeof Despesa>, criadoPorId: string) {
+  const orcamento = await Orcamento.findOne({ grupoId: despesa.grupoId, mes: despesa.mes, ano: despesa.ano });
+  const itemOrcamento = orcamento?.categorias.find((c) => c.categoriaNome === despesa.categoria);
+  if (!itemOrcamento) return null;
+
+  const soma = await Despesa.aggregate([
+    { $match: { grupoId: despesa.grupoId, categoria: despesa.categoria, mes: despesa.mes, ano: despesa.ano } },
+    { $group: { _id: null, total: { $sum: "$valor" } } },
+  ]);
+  const gastoReal: number = soma[0]?.total ?? 0;
+  if (gastoReal <= itemOrcamento.valorPrevisto) return null;
+
+  const mes = `${despesa.ano}-${String(despesa.mes).padStart(2, "0")}`;
+  return Notificacao.findOneAndUpdate(
+    {
+      grupoId: despesa.grupoId,
+      memberId: criadoPorId,
+      tipo: "orcamento_ultrapassado",
+      categoria: despesa.categoria,
+      mes,
+      lido: false,
+    },
+    {
+      $set: {
+        orcamentoPrevisao: itemOrcamento.valorPrevisto,
+        gastoReal,
+        excesso: gastoReal - itemOrcamento.valorPrevisto,
+      },
+    },
+    { upsert: true, new: true }
+  );
+}
 
 export async function listar(req: Request, res: Response) {
   const { grupoId } = req.params;
@@ -32,7 +71,7 @@ export async function criar(req: Request, res: Response) {
     data: string;
     descricao?: string;
   };
-  const categoria = capitalizarInicial(req.body.categoria as string);
+  const categoria = normalizarCategoria(req.body.categoria as string);
 
   const dataDespesa = new Date(data);
   if (Number.isNaN(dataDespesa.getTime())) {
@@ -51,7 +90,9 @@ export async function criar(req: Request, res: Response) {
     descricao,
   });
 
-  res.status(201).json({ despesa });
+  const notificacao = await notificarSeUltrapassouOrcamento(despesa, req.auth?.userId as string);
+
+  res.status(201).json({ despesa, notificacao });
 }
 
 export async function obter(req: Request, res: Response) {
@@ -76,7 +117,7 @@ export async function editar(req: Request, res: Response) {
     descricao: string;
   }>;
 
-  if (categoria !== undefined) despesa.categoria = capitalizarInicial(categoria);
+  if (categoria !== undefined) despesa.categoria = normalizarCategoria(categoria);
   if (tipo !== undefined) despesa.tipo = tipo as typeof despesa.tipo;
   if (valor !== undefined) despesa.valor = valor;
   if (descricao !== undefined) despesa.descricao = descricao;

@@ -15,7 +15,10 @@
       "Bash(curl -s http://localhost:4000/api/health)",
       "Bash(lsof -ti:4000)",
       "Bash(xargs kill -9)",
-      "Bash(lsof -i:4000)"
+      "Bash(lsof -i:4000)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(lsof -i :5173 -sTCP:LISTEN -n -P)",
+      "Bash(ps -p 53818 -o pid,ppid,command)"
     ]
   }
 }

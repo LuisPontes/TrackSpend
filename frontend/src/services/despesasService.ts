@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { Despesa, TipoDespesa, DashboardResumo } from "../types";
+import type { Despesa, TipoDespesa, DashboardResumo, Notificacao } from "../types";
 
 export interface FiltrosDespesas {
   mes?: number;
@@ -21,9 +21,15 @@ export async function listarDespesas(grupoId: string, filtros: FiltrosDespesas =
   return data.despesas;
 }
 
-export async function criarDespesa(grupoId: string, despesa: NovaDespesa): Promise<Despesa> {
-  const { data } = await api.post<{ despesa: Despesa }>(`/grupos/${grupoId}/despesas`, despesa);
-  return data.despesa;
+export async function criarDespesa(
+  grupoId: string,
+  despesa: NovaDespesa
+): Promise<{ despesa: Despesa; notificacao: Notificacao | null }> {
+  const { data } = await api.post<{ despesa: Despesa; notificacao: Notificacao | null }>(
+    `/grupos/${grupoId}/despesas`,
+    despesa
+  );
+  return data;
 }
 
 export async function editarDespesa(

@@ -63,7 +63,7 @@ export function OrcamentoMes({ grupoId, mes, ano, categorias, membros }: Props) 
         <select
           value={tipoDivisao}
           onChange={(e) => setTipoDivisao(e.target.value as TipoDivisao)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          className="min-h-11 rounded border border-slate-300 px-3 py-2 text-sm"
         >
           <option value="50/50">50/50</option>
           <option value="percentual">Percentual customizado</option>
@@ -83,7 +83,7 @@ export function OrcamentoMes({ grupoId, mes, ano, categorias, membros }: Props) 
               onChange={(e) =>
                 setValores((v) => ({ ...v, [categoria.nome]: Number(e.target.value) }))
               }
-              className="w-32 rounded border border-slate-300 px-2 py-1 text-right text-sm"
+              className="min-h-11 w-32 rounded border border-slate-300 px-2 py-1 text-right text-sm"
             />
           </div>
         ))}
@@ -95,7 +95,7 @@ export function OrcamentoMes({ grupoId, mes, ano, categorias, membros }: Props) 
       <button
         onClick={handleSalvar}
         disabled={salvando || categorias.length === 0}
-        className="mt-4 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="mt-4 min-h-12 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {salvando ? "A guardar..." : "Guardar orçamento"}
       </button>

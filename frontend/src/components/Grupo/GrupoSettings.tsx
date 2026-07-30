@@ -91,12 +91,12 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
               autoFocus
               value={novoNome}
               onChange={(e) => setNovoNome(e.target.value)}
-              className="rounded border border-slate-300 px-2 py-1 text-lg font-semibold"
+              className="min-h-11 rounded border border-slate-300 px-2 py-1 text-lg font-semibold"
             />
             <button
               type="submit"
               disabled={aGuardarNome}
-              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className="min-h-11 rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             >
               Guardar
             </button>
@@ -107,7 +107,7 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
                 setEditandoNome(false);
                 setErroNome(null);
               }}
-              className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+              className="min-h-11 rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
             >
               Cancelar
             </button>
@@ -141,12 +141,12 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
             placeholder="email@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+            className="min-h-11 flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
           />
           <button
             type="submit"
             disabled={enviando}
-            className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="min-h-12 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             Adicionar
           </button>
@@ -163,7 +163,7 @@ export function GrupoSettings({ grupo, aoAtualizar }: { grupo: Grupo; aoAtualiza
           <button
             onClick={handleEliminar}
             disabled={aEliminar}
-            className="rounded border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+            className="min-h-12 rounded border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
           >
             {aEliminar ? "A eliminar..." : "Eliminar grupo"}
           </button>

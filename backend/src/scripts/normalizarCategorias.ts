@@ -14,7 +14,7 @@ import { Grupo } from "../models/Grupo";
 import { Despesa } from "../models/Despesa";
 import { Categoria } from "../models/Categoria";
 import { Orcamento } from "../models/Orcamento";
-import { capitalizarInicial } from "../utils/texto";
+import { normalizarCategoria } from "../utils/categorias";
 
 const NOME_GRUPO = "casa";
 
@@ -32,7 +32,7 @@ async function main() {
 
   const grupos = new Map<string, string[]>(); // canonical -> variantes originais
   for (const nome of nomes) {
-    const canonico = capitalizarInicial(nome);
+    const canonico = normalizarCategoria(nome);
     if (!grupos.has(canonico)) grupos.set(canonico, []);
     grupos.get(canonico)!.push(nome);
   }
