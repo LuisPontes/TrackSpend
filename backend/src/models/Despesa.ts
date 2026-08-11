@@ -33,6 +33,6 @@ const despesaSchema = new Schema<IDespesa>(
 );
 
 despesaSchema.index({ grupoId: 1, mes: 1, ano: 1 });
-despesaSchema.index({ grupoId: 1, categoria: 1 });
+despesaSchema.index({ grupoId: 1, categoria: 1, data: -1 });
 
 export const Despesa = model<IDespesa>("Despesa", despesaSchema);

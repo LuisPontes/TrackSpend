@@ -51,6 +51,16 @@ export async function obterDashboard(grupoId: string, mes: number, ano: number):
   return data;
 }
 
+export async function listarDespesasPorCategoria(
+  grupoId: string,
+  filtros: { categoria: string; mes?: number; ano: number }
+): Promise<Despesa[]> {
+  const { data } = await api.get<{ despesas: Despesa[] }>(`/grupos/${grupoId}/despesas/por-categoria`, {
+    params: filtros,
+  });
+  return data.despesas;
+}
+
 export async function listarAnosDisponiveis(grupoId: string): Promise<number[]> {
   const { data } = await api.get<{ anos: number[] }>(`/grupos/${grupoId}/despesas/anos`);
   const anoAtual = new Date().getFullYear();

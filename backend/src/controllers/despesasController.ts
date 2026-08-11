@@ -75,6 +75,25 @@ export async function listar(req: Request, res: Response) {
   res.json({ despesas });
 }
 
+export async function porCategoria(req: Request, res: Response) {
+  const { grupoId } = req.params;
+  const { categoria, mes, ano } = req.query as Record<string, string | undefined>;
+
+  if (!categoria || !ano) {
+    throw new AppError("categoria e ano são obrigatórios", 422);
+  }
+
+  const filtro: Record<string, unknown> = {
+    grupoId,
+    categoria: normalizarCategoria(categoria),
+    ano: Number(ano),
+  };
+  if (mes) filtro.mes = Number(mes);
+
+  const despesas = await Despesa.find(filtro).sort({ data: -1, criadoEm: -1 });
+  res.json({ despesas });
+}
+
 export async function listarAnos(req: Request, res: Response) {
   const anos = await Despesa.distinct("ano", { grupoId: req.params.grupoId });
   res.json({ anos: anos.sort((a, b) => a - b) });

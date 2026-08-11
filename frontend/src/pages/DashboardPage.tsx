@@ -30,7 +30,7 @@ export function DashboardPage() {
         <p className="text-sm text-slate-500">A carregar...</p>
       ) : (
         <>
-          <TabelaDespesas dashboard={dashboard} membros={grupo.membros} />
+          <TabelaDespesas dashboard={dashboard} membros={grupo.membros} grupoId={grupoId} mes={mes} ano={ano} />
           <AcertoContas dashboard={dashboard} membros={grupo.membros} />
         </>
       )}
