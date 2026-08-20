@@ -15,6 +15,7 @@ import acertosRoutes from "./routes/acertos.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import notificacoesRoutes from "./routes/notificacoes.routes";
 import usuariosRoutes from "./routes/usuarios.routes";
+import backupRoutes from "./routes/backup.routes";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuariosRoutes);
+app.use("/api/backup", backupRoutes);
 app.use("/api/grupos", gruposRoutes);
 app.use("/api/grupos/:grupoId/despesas", despesasRoutes);
 app.use("/api/grupos/:grupoId/categorias", categoriasRoutes);

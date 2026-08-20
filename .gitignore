@@ -6,3 +6,4 @@ build/
 atlas-credentials.env
 *.log
 .DS_Store
+backups/
