@@ -3,6 +3,7 @@
  *   "SuperMercado" / "Supermercado" -> "Alimentação"
  *   "Cafes/Bar"                     -> "Cafes/Bares"
  *   "Transportes"                   -> "Transporte"
+ *   "Linpeza"                       -> "Limpeza"
  *
  * Uso:
  *   npx tsx src/scripts/unificarCategorias.ts [--apply]
@@ -23,6 +24,7 @@ const MAPEAMENTO: Record<string, string> = {
   Supermercado: "Alimentação",
   "Cafes/Bar": "Cafes/Bares",
   Transportes: "Transporte",
+  Linpeza: "Limpeza",
 };
 
 async function main() {
