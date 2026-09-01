@@ -60,10 +60,16 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
     );
   }
 
-  const mediaPorAno: Record<number, number> = {};
+  const hoje = new Date();
+  const mediaPorAno: Record<number, number | null> = {};
   anosSelecionados.forEach((ano) => {
-    const soma = dados.reduce((s, linha) => s + (Number(linha[ano]) || 0), 0);
-    mediaPorAno[ano] = soma / (dados.length || 1);
+    const mesesFechados = ano < hoje.getFullYear() ? 12 : ano === hoje.getFullYear() ? hoje.getMonth() : 0;
+    if (mesesFechados === 0) {
+      mediaPorAno[ano] = null;
+      return;
+    }
+    const soma = dados.slice(0, mesesFechados).reduce((s, linha) => s + (Number(linha[ano]) || 0), 0);
+    mediaPorAno[ano] = soma / mesesFechados;
   });
 
   return (
@@ -110,21 +116,25 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
             {anosSelecionados.map((ano, index) => (
               <Line key={ano} type="monotone" dataKey={ano} stroke={CORES[index % CORES.length]} strokeWidth={2} dot={{ r: 3 }} />
             ))}
-            {anosSelecionados.map((ano, index) => (
-              <ReferenceLine
-                key={`media-${ano}`}
-                y={mediaPorAno[ano]}
-                stroke={CORES[index % CORES.length]}
-                strokeDasharray="5 4"
-                strokeOpacity={0.6}
-                label={{
-                  value: `${ano}: ${mediaPorAno[ano].toFixed(2)} €`,
-                  position: index % 2 === 0 ? "insideTopRight" : "insideBottomRight",
-                  fill: CORES[index % CORES.length],
-                  fontSize: 11,
-                }}
-              />
-            ))}
+            {anosSelecionados.map((ano, index) => {
+              const media = mediaPorAno[ano];
+              if (media === null) return null;
+              return (
+                <ReferenceLine
+                  key={`media-${ano}`}
+                  y={media}
+                  stroke={CORES[index % CORES.length]}
+                  strokeDasharray="5 4"
+                  strokeOpacity={0.6}
+                  label={{
+                    value: `${ano}: ${media.toFixed(2)} €`,
+                    position: index % 2 === 0 ? "insideTopRight" : "insideBottomRight",
+                    fill: CORES[index % CORES.length],
+                    fontSize: 11,
+                  }}
+                />
+              );
+            })}
           </LineChart>
         </ResponsiveContainer>
       )}
