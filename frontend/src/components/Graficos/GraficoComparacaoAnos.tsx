@@ -119,7 +119,7 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
                 strokeOpacity={0.6}
                 label={{
                   value: `${ano}: ${mediaPorAno[ano].toFixed(2)} €`,
-                  position: index % 2 === 0 ? "right" : "left",
+                  position: index % 2 === 0 ? "insideTopRight" : "insideBottomRight",
                   fill: CORES[index % CORES.length],
                   fontSize: 11,
                 }}
