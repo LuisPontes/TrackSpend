@@ -117,6 +117,12 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
                 stroke={CORES[index % CORES.length]}
                 strokeDasharray="5 4"
                 strokeOpacity={0.6}
+                label={{
+                  value: `${ano}: ${mediaPorAno[ano].toFixed(2)} €`,
+                  position: index % 2 === 0 ? "right" : "left",
+                  fill: CORES[index % CORES.length],
+                  fontSize: 11,
+                }}
               />
             ))}
           </LineChart>
