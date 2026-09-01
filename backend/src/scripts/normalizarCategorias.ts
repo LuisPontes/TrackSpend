@@ -1,6 +1,7 @@
 /**
- * Unifica categorias que só diferem na capitalização (ex: "violeta" e "Violeta")
- * e garante que o nome final começa com maiúscula. Uso:
+ * Unifica categorias que só diferem em acentuação/capitalização/sinónimos
+ * conhecidos (ex: "Saude" e "Saúde", "cafe" e "Café") em todos os grupos.
+ * Uso:
  *
  *   npx tsx src/scripts/normalizarCategorias.ts [--apply]
  *
@@ -16,19 +17,8 @@ import { Categoria } from "../models/Categoria";
 import { Orcamento } from "../models/Orcamento";
 import { normalizarCategoria } from "../utils/categorias";
 
-const NOME_GRUPO = "casa";
-
-async function main() {
-  const apply = process.argv.includes("--apply");
-
-  await mongoose.connect(process.env.DATABASE_URL as string);
-
-  const grupo = await Grupo.findOne({ nome: new RegExp(`^${NOME_GRUPO}$`, "i") });
-  if (!grupo) {
-    throw new Error(`Grupo "${NOME_GRUPO}" não encontrado.`);
-  }
-
-  const nomes = await Despesa.distinct("categoria", { grupoId: grupo._id });
+async function normalizarGrupo(grupoId: mongoose.Types.ObjectId, nomeGrupo: string, apply: boolean) {
+  const nomes = await Despesa.distinct("categoria", { grupoId });
 
   const grupos = new Map<string, string[]>(); // canonical -> variantes originais
   for (const nome of nomes) {
@@ -37,34 +27,34 @@ async function main() {
     grupos.get(canonico)!.push(nome);
   }
 
-  let totalDespesasAtualizadas = 0;
-  let totalOrcamentosAtualizados = 0;
+  let despesasAtualizadas = 0;
+  let orcamentosAtualizados = 0;
 
   for (const [canonico, variantes] of grupos) {
     const aRenomear = variantes.filter((v) => v !== canonico);
     if (aRenomear.length === 0) continue;
 
-    console.log(`"${variantes.join('", "')}" → "${canonico}"`);
+    console.log(`[${nomeGrupo}] "${variantes.join('", "')}" → "${canonico}"`);
 
     if (!apply) continue;
 
     for (const variante of aRenomear) {
       const resDespesas = await Despesa.updateMany(
-        { grupoId: grupo._id, categoria: variante },
+        { grupoId, categoria: variante },
         { $set: { categoria: canonico } }
       );
-      totalDespesasAtualizadas += resDespesas.modifiedCount;
+      despesasAtualizadas += resDespesas.modifiedCount;
 
       const resOrcamentos = await Orcamento.updateMany(
-        { grupoId: grupo._id, "categorias.categoriaNome": variante },
+        { grupoId, "categorias.categoriaNome": variante },
         { $set: { "categorias.$[item].categoriaNome": canonico } },
         { arrayFilters: [{ "item.categoriaNome": variante }] }
       );
-      totalOrcamentosAtualizados += resOrcamentos.modifiedCount;
+      orcamentosAtualizados += resOrcamentos.modifiedCount;
 
-      const categoriaVariante = await Categoria.findOne({ grupoId: grupo._id, nome: variante });
+      const categoriaVariante = await Categoria.findOne({ grupoId, nome: variante });
       if (categoriaVariante) {
-        const categoriaCanonica = await Categoria.findOne({ grupoId: grupo._id, nome: canonico });
+        const categoriaCanonica = await Categoria.findOne({ grupoId, nome: canonico });
         if (categoriaCanonica) {
           await Categoria.deleteOne({ _id: categoriaVariante._id });
         } else {
@@ -73,6 +63,28 @@ async function main() {
         }
       }
     }
+  }
+
+  return { despesasAtualizadas, orcamentosAtualizados };
+}
+
+async function main() {
+  const apply = process.argv.includes("--apply");
+
+  await mongoose.connect(process.env.DATABASE_URL as string);
+
+  const grupos = await Grupo.find({});
+  if (grupos.length === 0) {
+    throw new Error("Nenhum grupo encontrado.");
+  }
+
+  let totalDespesasAtualizadas = 0;
+  let totalOrcamentosAtualizados = 0;
+
+  for (const grupo of grupos) {
+    const { despesasAtualizadas, orcamentosAtualizados } = await normalizarGrupo(grupo._id, grupo.nome, apply);
+    totalDespesasAtualizadas += despesasAtualizadas;
+    totalOrcamentosAtualizados += orcamentosAtualizados;
   }
 
   if (!apply) {

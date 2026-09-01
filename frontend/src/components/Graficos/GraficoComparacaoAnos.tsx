@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { LineChart, Line, ReferenceLine, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import * as despesasService from "../../services/despesasService";
 import * as categoriasService from "../../services/categoriasService";
 import type { Categoria } from "../../types";
@@ -60,6 +60,12 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
     );
   }
 
+  const mediaPorAno: Record<number, number> = {};
+  anosSelecionados.forEach((ano) => {
+    const soma = dados.reduce((s, linha) => s + (Number(linha[ano]) || 0), 0);
+    mediaPorAno[ano] = soma / (dados.length || 1);
+  });
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-3">
@@ -103,6 +109,15 @@ export function GraficoComparacaoAnos({ grupoId, anosDisponiveis }: Props) {
             <Legend />
             {anosSelecionados.map((ano, index) => (
               <Line key={ano} type="monotone" dataKey={ano} stroke={CORES[index % CORES.length]} strokeWidth={2} dot={{ r: 3 }} />
+            ))}
+            {anosSelecionados.map((ano, index) => (
+              <ReferenceLine
+                key={`media-${ano}`}
+                y={mediaPorAno[ano]}
+                stroke={CORES[index % CORES.length]}
+                strokeDasharray="5 4"
+                strokeOpacity={0.6}
+              />
             ))}
           </LineChart>
         </ResponsiveContainer>

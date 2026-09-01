@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { LineChart, Line, ReferenceLine, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import * as despesasService from "../../services/despesasService";
 
 const MESES_ABREV = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -22,6 +22,8 @@ export function GraficoAnual({ grupoId, ano }: { grupoId: string; ano: number })
 
   if (carregando) return <p className="text-sm text-slate-500">A carregar...</p>;
 
+  const media = dados.reduce((soma, d) => soma + d.total, 0) / (dados.length || 1);
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={dados}>
@@ -30,6 +32,13 @@ export function GraficoAnual({ grupoId, ano }: { grupoId: string; ano: number })
         <YAxis tick={{ fontSize: 12 }} />
         <Tooltip formatter={(value) => `${Number(value).toFixed(2)} €`} />
         <Line type="monotone" dataKey="total" stroke="#a855f7" strokeWidth={2} dot={{ r: 3 }} />
+        <ReferenceLine
+          y={media}
+          stroke="#a855f7"
+          strokeDasharray="5 4"
+          strokeOpacity={0.6}
+          label={{ value: `Média: ${media.toFixed(2)} €`, position: "insideTopRight", fill: "#a855f7", fontSize: 11 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
