@@ -5,6 +5,7 @@ import * as categoriasService from "../services/categoriasService";
 import * as backupService from "../services/backupService";
 import { GrupoSettings } from "../components/Grupo/GrupoSettings";
 import { OrcamentoMes } from "../components/Grupo/OrcamentoMes";
+import { CategoriasSettings } from "../components/Grupo/CategoriasSettings";
 
 export function SettingsPage() {
   const { grupoId, grupo, recarregar } = useGrupo();
@@ -15,7 +16,10 @@ export function SettingsPage() {
   const [mensagemBackup, setMensagemBackup] = useState<string | null>(null);
   const [erroBackup, setErroBackup] = useState<string | null>(null);
 
-  const { dados: categorias } = useFetch(() => categoriasService.listarCategorias(grupoId), [grupoId]);
+  const { dados: categorias, recarregar: recarregarCategorias } = useFetch(
+    () => categoriasService.listarCategorias(grupoId),
+    [grupoId]
+  );
 
   async function handleBackup() {
     setErroBackup(null);
@@ -41,6 +45,7 @@ export function SettingsPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Definições</h1>
       <GrupoSettings grupo={grupo} aoAtualizar={recarregar} />
+      <CategoriasSettings grupoId={grupoId} categorias={categorias ?? []} aoAtualizar={recarregarCategorias} />
       <OrcamentoMes
         grupoId={grupoId}
         mes={mes}

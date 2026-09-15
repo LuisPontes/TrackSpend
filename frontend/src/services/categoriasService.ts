@@ -15,3 +15,12 @@ export async function criarCategoria(
   const { data } = await api.post<{ categoria: Categoria }>(`/grupos/${grupoId}/categorias`, { nome, tipo, cor });
   return data.categoria;
 }
+
+export async function editarCategoria(
+  grupoId: string,
+  categoriaId: string,
+  dados: Partial<{ nome: string; tipo: TipoDespesa; cor: string; ativo: boolean }>
+): Promise<Categoria> {
+  const { data } = await api.put<{ categoria: Categoria }>(`/grupos/${grupoId}/categorias/${categoriaId}`, dados);
+  return data.categoria;
+}
