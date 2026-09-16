@@ -1,5 +1,6 @@
 export type TipoDespesa = "FIXA" | "VARIAVEL";
 export type TipoDivisao = "50/50" | "percentual" | "fixo";
+export type TipoGrupo = "PARTILHADO" | "EMPRESTIMO" | "ARRENDAMENTO";
 
 export interface Usuario {
   id: string;
@@ -21,6 +22,7 @@ export interface Grupo {
   _id: string;
   nome: string;
   descricao?: string;
+  tipo: TipoGrupo;
   criadorId: string;
   membros: MembroGrupo[];
   moeda: string;
@@ -127,4 +129,41 @@ export interface DashboardResumo {
   };
   saldos: Record<string, number>;
   transferencias: Transferencia[];
+}
+
+export interface PagamentoEmprestimo {
+  _id: string;
+  valor: number;
+  data: string;
+  descricao?: string;
+  criadoEm: string;
+}
+
+export interface Emprestimo {
+  _id: string;
+  grupoId: string;
+  credorId: string;
+  devedorId: string;
+  valor: number;
+  data: string;
+  descricao?: string;
+  pagamentos: PagamentoEmprestimo[];
+  totalPago: number;
+  saldo: number;
+  criadoEm: string;
+}
+
+export type TipoMovimentoArrendamento = "RECEITA" | "DESPESA";
+
+export interface MovimentoArrendamento {
+  _id: string;
+  grupoId: string;
+  usuarioId: string;
+  tipo: TipoMovimentoArrendamento;
+  categoria: string;
+  valor: number;
+  data: string;
+  mes: number;
+  ano: number;
+  descricao?: string;
 }

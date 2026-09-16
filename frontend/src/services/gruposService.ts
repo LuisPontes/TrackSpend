@@ -1,13 +1,13 @@
 import { api } from "./api";
-import type { Grupo } from "../types";
+import type { Grupo, TipoGrupo } from "../types";
 
 export async function listarGrupos(): Promise<Grupo[]> {
   const { data } = await api.get<{ grupos: Grupo[] }>("/grupos");
   return data.grupos;
 }
 
-export async function criarGrupo(nome: string, descricao?: string): Promise<Grupo> {
-  const { data } = await api.post<{ grupo: Grupo }>("/grupos", { nome, descricao });
+export async function criarGrupo(nome: string, tipo: TipoGrupo, descricao?: string): Promise<Grupo> {
+  const { data } = await api.post<{ grupo: Grupo }>("/grupos", { nome, tipo, descricao });
   return data.grupo;
 }
 

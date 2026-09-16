@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useFetch } from "../hooks/useFetch";
+import * as gruposService from "../services/gruposService";
+import type { TipoGrupo } from "../types";
 import { NotificacoesProvider } from "../context/NotificacoesContext";
 import { NotificacaoBadge } from "./Notificacoes/NotificacaoBadge";
 
@@ -10,26 +13,40 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 const linkClassMobile = ({ isActive }: { isActive: boolean }) =>
   `block rounded px-3 py-3 text-base ${isActive ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`;
 
-function LinksGrupo({ grupoId }: { grupoId: string }) {
+function linksPorTipo(grupoId: string, tipo: TipoGrupo): { to: string; label: string }[] {
+  if (tipo === "EMPRESTIMO") {
+    return [
+      { to: `/grupos/${grupoId}/emprestimos`, label: "Empréstimos" },
+      { to: `/grupos/${grupoId}/settings`, label: "Definições" },
+    ];
+  }
+  if (tipo === "ARRENDAMENTO") {
+    return [
+      { to: `/grupos/${grupoId}/arrendamento`, label: "Arrendamento" },
+      { to: `/grupos/${grupoId}/settings`, label: "Definições" },
+    ];
+  }
+  return [
+    { to: `/grupos/${grupoId}/dashboard`, label: "Dashboard" },
+    { to: `/grupos/${grupoId}/despesas`, label: "Despesas" },
+    { to: `/grupos/${grupoId}/graficos`, label: "Gráficos" },
+    { to: `/grupos/${grupoId}/settings`, label: "Definições" },
+  ];
+}
+
+function LinksGrupo({ grupoId, tipo }: { grupoId: string; tipo: TipoGrupo }) {
   return (
     <>
-      <NavLink to={`/grupos/${grupoId}/dashboard`} className={linkClass}>
-        Dashboard
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/despesas`} className={linkClass}>
-        Despesas
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/graficos`} className={linkClass}>
-        Gráficos
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/settings`} className={linkClass}>
-        Definições
-      </NavLink>
+      {linksPorTipo(grupoId, tipo).map((link) => (
+        <NavLink key={link.to} to={link.to} className={linkClass}>
+          {link.label}
+        </NavLink>
+      ))}
     </>
   );
 }
 
-function LinksGrupoMobile({ grupoId, aoNavegar }: { grupoId: string; aoNavegar: () => void }) {
+function LinksGrupoMobile({ grupoId, tipo, aoNavegar }: { grupoId: string; tipo: TipoGrupo; aoNavegar: () => void }) {
   return (
     <>
       <Link
@@ -39,23 +56,16 @@ function LinksGrupoMobile({ grupoId, aoNavegar }: { grupoId: string; aoNavegar: 
       >
         ← Grupos
       </Link>
-      <NavLink to={`/grupos/${grupoId}/dashboard`} className={linkClassMobile} onClick={aoNavegar}>
-        Dashboard
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/despesas`} className={linkClassMobile} onClick={aoNavegar}>
-        Despesas
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/graficos`} className={linkClassMobile} onClick={aoNavegar}>
-        Gráficos
-      </NavLink>
-      <NavLink to={`/grupos/${grupoId}/settings`} className={linkClassMobile} onClick={aoNavegar}>
-        Definições
-      </NavLink>
+      {linksPorTipo(grupoId, tipo).map((link) => (
+        <NavLink key={link.to} to={link.to} className={linkClassMobile} onClick={aoNavegar}>
+          {link.label}
+        </NavLink>
+      ))}
     </>
   );
 }
 
-function LayoutConteudo({ grupoId }: { grupoId?: string }) {
+function LayoutConteudo({ grupoId, tipo }: { grupoId?: string; tipo?: TipoGrupo }) {
   const { usuario, logout } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
 
@@ -76,7 +86,7 @@ function LayoutConteudo({ grupoId }: { grupoId?: string }) {
             <Link to="/grupos" className="font-semibold hover:text-slate-600">
               TrackSpend
             </Link>
-            {grupoId && (
+            {grupoId && tipo && (
               <nav className="hidden gap-1 md:flex">
                 <Link
                   to="/grupos"
@@ -85,7 +95,7 @@ function LayoutConteudo({ grupoId }: { grupoId?: string }) {
                 >
                   ← Grupos
                 </Link>
-                <LinksGrupo grupoId={grupoId} />
+                <LinksGrupo grupoId={grupoId} tipo={tipo} />
               </nav>
             )}
           </div>
@@ -102,7 +112,7 @@ function LayoutConteudo({ grupoId }: { grupoId?: string }) {
         </div>
       </header>
 
-      {grupoId && menuAberto && (
+      {grupoId && tipo && menuAberto && (
         <>
           <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setMenuAberto(false)} />
           <nav
@@ -110,7 +120,7 @@ function LayoutConteudo({ grupoId }: { grupoId?: string }) {
             aria-label="Menu"
           >
             <p className="mb-2 px-3 text-sm font-semibold text-slate-400">TrackSpend</p>
-            <LinksGrupoMobile grupoId={grupoId} aoNavegar={() => setMenuAberto(false)} />
+            <LinksGrupoMobile grupoId={grupoId} tipo={tipo} aoNavegar={() => setMenuAberto(false)} />
           </nav>
         </>
       )}
@@ -124,11 +134,15 @@ function LayoutConteudo({ grupoId }: { grupoId?: string }) {
 
 export function Layout() {
   const { grupoId } = useParams();
+  const { dados: grupo } = useFetch(
+    () => (grupoId ? gruposService.obterGrupo(grupoId) : Promise.resolve(null)),
+    [grupoId]
+  );
 
   if (grupoId) {
     return (
       <NotificacoesProvider grupoId={grupoId}>
-        <LayoutConteudo grupoId={grupoId} />
+        <LayoutConteudo grupoId={grupoId} tipo={grupo?.tipo} />
       </NotificacoesProvider>
     );
   }

@@ -1,5 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
 
+export type TipoGrupo = "PARTILHADO" | "EMPRESTIMO" | "ARRENDAMENTO";
+
 export interface IGrupoSettings {
   permitirDespesaEmNomeOutro: boolean;
 }
@@ -7,6 +9,7 @@ export interface IGrupoSettings {
 export interface IGrupo extends Document {
   nome: string;
   descricao?: string;
+  tipo: TipoGrupo;
   criadorId: Types.ObjectId;
   membros: Types.ObjectId[];
   moeda: string;
@@ -19,6 +22,7 @@ const grupoSchema = new Schema<IGrupo>(
   {
     nome: { type: String, required: true, trim: true },
     descricao: { type: String, trim: true },
+    tipo: { type: String, enum: ["PARTILHADO", "EMPRESTIMO", "ARRENDAMENTO"], default: "PARTILHADO" },
     criadorId: { type: Schema.Types.ObjectId, ref: "Usuario", required: true },
     membros: [{ type: Schema.Types.ObjectId, ref: "Usuario" }],
     moeda: { type: String, default: "EUR" },

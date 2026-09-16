@@ -16,6 +16,8 @@ import dashboardRoutes from "./routes/dashboard.routes";
 import notificacoesRoutes from "./routes/notificacoes.routes";
 import usuariosRoutes from "./routes/usuarios.routes";
 import backupRoutes from "./routes/backup.routes";
+import emprestimosRoutes from "./routes/emprestimos.routes";
+import arrendamentoRoutes from "./routes/arrendamento.routes";
 
 const app = express();
 
@@ -40,6 +42,8 @@ app.use("/api/grupos/:grupoId/orcamentos", orcamentosRoutes);
 app.use("/api/grupos/:grupoId/acertos", acertosRoutes);
 app.use("/api/grupos/:grupoId/dashboard", dashboardRoutes);
 app.use("/api/grupos/:grupoId/notificacoes", notificacoesRoutes);
+app.use("/api/grupos/:grupoId/emprestimos", emprestimosRoutes);
+app.use("/api/grupos/:grupoId/arrendamento", arrendamentoRoutes);
 
 app.use(errorHandler);
 

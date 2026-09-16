@@ -5,6 +5,8 @@ import { Despesa } from "../models/Despesa";
 import { Categoria } from "../models/Categoria";
 import { Orcamento } from "../models/Orcamento";
 import { Acerto } from "../models/Acerto";
+import { Emprestimo } from "../models/Emprestimo";
+import { MovimentoArrendamento } from "../models/MovimentoArrendamento";
 import { AppError } from "../middleware/errorHandler";
 import { requireFields } from "../utils/validators";
 
@@ -17,13 +19,19 @@ export async function listar(req: Request, res: Response) {
 
 export async function criar(req: Request, res: Response) {
   requireFields(req.body, ["nome"]);
-  const { nome, descricao, moeda } = req.body as { nome: string; descricao?: string; moeda?: string };
+  const { nome, descricao, moeda, tipo } = req.body as {
+    nome: string;
+    descricao?: string;
+    moeda?: string;
+    tipo?: string;
+  };
   const userId = req.auth?.userId as string;
 
   const grupo = await Grupo.create({
     nome,
     descricao,
     moeda: moeda ?? "EUR",
+    tipo: tipo ?? "PARTILHADO",
     criadorId: userId,
     membros: [userId],
   });
@@ -85,6 +93,8 @@ export async function eliminar(req: Request, res: Response) {
     Categoria.deleteMany({ grupoId: grupo._id }),
     Orcamento.deleteMany({ grupoId: grupo._id }),
     Acerto.deleteMany({ grupoId: grupo._id }),
+    Emprestimo.deleteMany({ grupoId: grupo._id }),
+    MovimentoArrendamento.deleteMany({ grupoId: grupo._id }),
     Usuario.updateMany({ grupos: grupo._id }, { $pull: { grupos: grupo._id } }),
   ]);
   await Grupo.findByIdAndDelete(grupo._id);
