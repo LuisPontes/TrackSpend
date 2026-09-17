@@ -54,6 +54,28 @@ export async function criar(req: Request, res: Response) {
   res.status(201).json({ emprestimo: comSaldo(emprestimo) });
 }
 
+export async function editar(req: Request, res: Response) {
+  const emprestimo = await Emprestimo.findOne({ _id: req.params.id, grupoId: req.params.grupoId });
+  if (!emprestimo) {
+    throw new AppError("Empréstimo não encontrado", 404);
+  }
+
+  const { valor, data, descricao } = req.body as Partial<{ valor: number; data: string; descricao: string }>;
+
+  if (valor !== undefined) emprestimo.valor = valor;
+  if (descricao !== undefined) emprestimo.descricao = descricao;
+  if (data !== undefined) {
+    const dataEmprestimo = new Date(data);
+    if (Number.isNaN(dataEmprestimo.getTime())) {
+      throw new AppError("Data inválida", 422);
+    }
+    emprestimo.data = dataEmprestimo;
+  }
+
+  await emprestimo.save();
+  res.json({ emprestimo: comSaldo(emprestimo) });
+}
+
 export async function registarPagamento(req: Request, res: Response) {
   requireFields(req.body, ["valor", "data"]);
   const { valor, data, descricao } = req.body as { valor: number; data: string; descricao?: string };
@@ -80,4 +102,20 @@ export async function remover(req: Request, res: Response) {
     throw new AppError("Empréstimo não encontrado", 404);
   }
   res.status(204).send();
+}
+
+export async function removerPagamento(req: Request, res: Response) {
+  const emprestimo = await Emprestimo.findOne({ _id: req.params.id, grupoId: req.params.grupoId });
+  if (!emprestimo) {
+    throw new AppError("Empréstimo não encontrado", 404);
+  }
+
+  const existe = emprestimo.pagamentos.some((p) => p._id.toString() === req.params.pagamentoId);
+  if (!existe) {
+    throw new AppError("Pagamento não encontrado", 404);
+  }
+  emprestimo.pagamentos.pull({ _id: req.params.pagamentoId });
+
+  await emprestimo.save();
+  res.json({ emprestimo: comSaldo(emprestimo) });
 }

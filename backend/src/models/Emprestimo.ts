@@ -15,7 +15,7 @@ export interface IEmprestimo extends Document {
   valor: number;
   data: Date;
   descricao?: string;
-  pagamentos: IPagamentoEmprestimo[];
+  pagamentos: Types.DocumentArray<IPagamentoEmprestimo>;
   criadoEm: Date;
   atualizadoEm: Date;
 }

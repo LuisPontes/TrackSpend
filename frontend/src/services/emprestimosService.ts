@@ -14,6 +14,22 @@ export async function criarEmprestimo(
   return data.emprestimo;
 }
 
+export async function editarEmprestimo(
+  grupoId: string,
+  emprestimoId: string,
+  dados: Partial<{ valor: number; data: string; descricao: string }>
+): Promise<Emprestimo> {
+  const { data } = await api.put<{ emprestimo: Emprestimo }>(`/grupos/${grupoId}/emprestimos/${emprestimoId}`, dados);
+  return data.emprestimo;
+}
+
+export async function removerPagamento(grupoId: string, emprestimoId: string, pagamentoId: string): Promise<Emprestimo> {
+  const { data } = await api.delete<{ emprestimo: Emprestimo }>(
+    `/grupos/${grupoId}/emprestimos/${emprestimoId}/pagamentos/${pagamentoId}`
+  );
+  return data.emprestimo;
+}
+
 export async function registarPagamento(
   grupoId: string,
   emprestimoId: string,

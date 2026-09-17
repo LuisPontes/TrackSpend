@@ -45,7 +45,7 @@ export function ArrendamentoPage() {
         {carregando || !movimentos ? (
           <p className="text-sm text-slate-500">A carregar...</p>
         ) : (
-          <ListaMovimentos movimentos={movimentos} aoRemover={handleRemover} />
+          <ListaMovimentos grupoId={grupoId} movimentos={movimentos} aoRemover={handleRemover} aoAtualizar={recarregar} />
         )}
       </div>
     </div>

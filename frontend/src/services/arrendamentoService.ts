@@ -36,6 +36,18 @@ export async function removerMovimento(grupoId: string, movimentoId: string): Pr
   await api.delete(`/grupos/${grupoId}/arrendamento/${movimentoId}`);
 }
 
+export async function editarMovimento(
+  grupoId: string,
+  movimentoId: string,
+  dados: Partial<NovoMovimentoArrendamento>
+): Promise<MovimentoArrendamento> {
+  const { data } = await api.put<{ movimento: MovimentoArrendamento }>(
+    `/grupos/${grupoId}/arrendamento/${movimentoId}`,
+    dados
+  );
+  return data.movimento;
+}
+
 export async function listarAnosDisponiveis(grupoId: string): Promise<number[]> {
   const { data } = await api.get<{ anos: number[] }>(`/grupos/${grupoId}/arrendamento/anos`);
   const anoAtual = new Date().getFullYear();

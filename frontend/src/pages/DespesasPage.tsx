@@ -44,7 +44,14 @@ export function DespesasPage() {
         {carregando || !despesas || !grupo ? (
           <p className="text-sm text-slate-500">A carregar...</p>
         ) : (
-          <ListaDespesas despesas={despesas} membros={grupo.membros} aoRemover={handleRemover} />
+          <ListaDespesas
+            grupoId={grupoId}
+            despesas={despesas}
+            membros={grupo.membros}
+            permitirDespesaEmNomeOutro={grupo.settings.permitirDespesaEmNomeOutro}
+            aoRemover={handleRemover}
+            aoAtualizar={recarregar}
+          />
         )}
       </div>
     </div>
