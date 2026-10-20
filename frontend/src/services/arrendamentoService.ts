@@ -48,6 +48,13 @@ export async function editarMovimento(
   return data.movimento;
 }
 
+export type CategoriasArrendamento = Record<TipoMovimentoArrendamento, string[]>;
+
+export async function listarCategorias(grupoId: string): Promise<CategoriasArrendamento> {
+  const { data } = await api.get<{ categorias: CategoriasArrendamento }>(`/grupos/${grupoId}/arrendamento/categorias`);
+  return data.categorias;
+}
+
 export async function listarAnosDisponiveis(grupoId: string): Promise<number[]> {
   const { data } = await api.get<{ anos: number[] }>(`/grupos/${grupoId}/arrendamento/anos`);
   const anoAtual = new Date().getFullYear();

@@ -1,10 +1,18 @@
 import { type FormEvent, useState } from "react";
 import type { TipoMovimentoArrendamento } from "../../types";
 import * as arrendamentoService from "../../services/arrendamentoService";
+import { SeletorCategoria } from "./SeletorCategoria";
 
-export function FormMovimento({ grupoId, aoCriar }: { grupoId: string; aoCriar: () => void }) {
+interface Props {
+  grupoId: string;
+  categorias: arrendamentoService.CategoriasArrendamento;
+  aoCriar: () => void;
+}
+
+export function FormMovimento({ grupoId, categorias, aoCriar }: Props) {
   const [tipo, setTipo] = useState<TipoMovimentoArrendamento>("RECEITA");
   const [categoria, setCategoria] = useState("");
+  const [versao, setVersao] = useState(0);
   const [valor, setValor] = useState("");
   const [data, setData] = useState(() => new Date().toISOString().slice(0, 10));
   const [descricao, setDescricao] = useState("");
@@ -22,6 +30,7 @@ export function FormMovimento({ grupoId, aoCriar }: { grupoId: string; aoCriar: 
         descricao: descricao || undefined,
       });
       setCategoria("");
+      setVersao((v) => v + 1);
       setValor("");
       setDescricao("");
       aoCriar();
@@ -34,19 +43,22 @@ export function FormMovimento({ grupoId, aoCriar }: { grupoId: string; aoCriar: 
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-6">
       <select
         value={tipo}
-        onChange={(e) => setTipo(e.target.value as TipoMovimentoArrendamento)}
+        onChange={(e) => {
+          setTipo(e.target.value as TipoMovimentoArrendamento);
+          setCategoria("");
+        }}
         className="min-h-11 rounded border border-slate-300 px-2 py-2 text-sm"
       >
         <option value="RECEITA">Receita</option>
         <option value="DESPESA">Despesa</option>
       </select>
 
-      <input
-        placeholder="Categoria (ex: Renda, Manutenção)"
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-        required
-        className="col-span-2 min-h-11 rounded border border-slate-300 px-2 py-2 text-sm md:col-span-2"
+      <SeletorCategoria
+        key={`${versao}-${tipo}`}
+        opcoes={categorias[tipo]}
+        valor={categoria}
+        aoMudar={setCategoria}
+        className="col-span-2 md:col-span-2"
       />
 
       <input

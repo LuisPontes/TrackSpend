@@ -18,17 +18,27 @@ export function ArrendamentoPage() {
     [grupoId]
   );
 
-  const { dados: movimentos, carregando, recarregar } = useFetch(
+  const { dados: movimentos, carregando, recarregar: recarregarMovimentos } = useFetch(
     () => arrendamentoService.listarMovimentos(grupoId, { mes, ano }),
     [grupoId, mes, ano]
   );
+
+  const { dados: categorias, recarregar: recarregarCategorias } = useFetch(
+    () => arrendamentoService.listarCategorias(grupoId),
+    [grupoId]
+  );
+
+  function recarregar() {
+    recarregarMovimentos();
+    recarregarCategorias();
+  }
 
   async function handleRemover(id: string) {
     await arrendamentoService.removerMovimento(grupoId, id);
     recarregar();
   }
 
-  if (!grupo) return <p className="text-sm text-slate-500">A carregar...</p>;
+  if (!grupo || !categorias) return <p className="text-sm text-slate-500">A carregar...</p>;
 
   return (
     <div className="space-y-6">
@@ -39,13 +49,19 @@ export function ArrendamentoPage() {
 
       {movimentos && <ResumoArrendamento movimentos={movimentos} />}
 
-      <FormMovimento grupoId={grupoId} aoCriar={recarregar} />
+      <FormMovimento grupoId={grupoId} categorias={categorias} aoCriar={recarregar} />
 
       <div className="rounded-lg border border-slate-200 bg-white p-4">
         {carregando || !movimentos ? (
           <p className="text-sm text-slate-500">A carregar...</p>
         ) : (
-          <ListaMovimentos grupoId={grupoId} movimentos={movimentos} aoRemover={handleRemover} aoAtualizar={recarregar} />
+          <ListaMovimentos
+            grupoId={grupoId}
+            movimentos={movimentos}
+            categorias={categorias}
+            aoRemover={handleRemover}
+            aoAtualizar={recarregar}
+          />
         )}
       </div>
     </div>

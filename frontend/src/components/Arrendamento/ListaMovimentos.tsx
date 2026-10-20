@@ -1,10 +1,12 @@
 import { type FormEvent, useState } from "react";
 import type { MovimentoArrendamento, TipoMovimentoArrendamento } from "../../types";
 import * as arrendamentoService from "../../services/arrendamentoService";
+import { SeletorCategoria } from "./SeletorCategoria";
 
 interface Props {
   grupoId: string;
   movimentos: MovimentoArrendamento[];
+  categorias: arrendamentoService.CategoriasArrendamento;
   aoRemover: (id: string) => void;
   aoAtualizar: () => void;
 }
@@ -12,11 +14,13 @@ interface Props {
 function FormEdicaoMovimento({
   grupoId,
   movimento,
+  categorias,
   aoGuardar,
   aoCancelar,
 }: {
   grupoId: string;
   movimento: MovimentoArrendamento;
+  categorias: arrendamentoService.CategoriasArrendamento;
   aoGuardar: () => void;
   aoCancelar: () => void;
 }) {
@@ -26,6 +30,11 @@ function FormEdicaoMovimento({
   const [data, setData] = useState(movimento.data.slice(0, 10));
   const [descricao, setDescricao] = useState(movimento.descricao ?? "");
   const [aGuardar, setAGuardar] = useState(false);
+
+  const opcoesCategoria =
+    tipo === movimento.tipo && !categorias[tipo].includes(movimento.categoria)
+      ? [movimento.categoria, ...categorias[tipo]]
+      : categorias[tipo];
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -48,17 +57,21 @@ function FormEdicaoMovimento({
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-2 rounded-lg border border-slate-300 bg-slate-50 p-3 md:grid-cols-6">
       <select
         value={tipo}
-        onChange={(e) => setTipo(e.target.value as TipoMovimentoArrendamento)}
+        onChange={(e) => {
+          setTipo(e.target.value as TipoMovimentoArrendamento);
+          setCategoria("");
+        }}
         className="min-h-10 rounded border border-slate-300 px-2 py-1 text-sm"
       >
         <option value="RECEITA">Receita</option>
         <option value="DESPESA">Despesa</option>
       </select>
-      <input
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-        required
-        className="col-span-2 min-h-10 rounded border border-slate-300 px-2 py-1 text-sm md:col-span-2"
+      <SeletorCategoria
+        key={tipo}
+        opcoes={opcoesCategoria}
+        valor={categoria}
+        aoMudar={setCategoria}
+        className="col-span-2 md:col-span-2"
       />
       <input
         type="number"
@@ -94,7 +107,7 @@ function FormEdicaoMovimento({
   );
 }
 
-export function ListaMovimentos({ grupoId, movimentos, aoRemover, aoAtualizar }: Props) {
+export function ListaMovimentos({ grupoId, movimentos, categorias, aoRemover, aoAtualizar }: Props) {
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
   if (movimentos.length === 0) {
@@ -122,6 +135,7 @@ export function ListaMovimentos({ grupoId, movimentos, aoRemover, aoAtualizar }:
                   <FormEdicaoMovimento
                     grupoId={grupoId}
                     movimento={m}
+                    categorias={categorias}
                     aoGuardar={() => {
                       setEditandoId(null);
                       aoAtualizar();
@@ -163,6 +177,7 @@ export function ListaMovimentos({ grupoId, movimentos, aoRemover, aoAtualizar }:
               key={m._id}
               grupoId={grupoId}
               movimento={m}
+              categorias={categorias}
               aoGuardar={() => {
                 setEditandoId(null);
                 aoAtualizar();
