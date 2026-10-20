@@ -10,6 +10,7 @@ import { GraficosPage } from "./pages/GraficosPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { EmprestimosPage } from "./pages/EmprestimosPage";
 import { ArrendamentoPage } from "./pages/ArrendamentoPage";
+import { ArrendamentoGraficosPage } from "./pages/ArrendamentoGraficosPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/grupos/:grupoId/settings" element={<SettingsPage />} />
           <Route path="/grupos/:grupoId/emprestimos" element={<EmprestimosPage />} />
           <Route path="/grupos/:grupoId/arrendamento" element={<ArrendamentoPage />} />
+          <Route path="/grupos/:grupoId/arrendamento/graficos" element={<ArrendamentoGraficosPage />} />
         </Route>
       </Route>
 

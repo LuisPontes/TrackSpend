@@ -23,6 +23,7 @@ function linksPorTipo(grupoId: string, tipo: TipoGrupo): { to: string; label: st
   if (tipo === "ARRENDAMENTO") {
     return [
       { to: `/grupos/${grupoId}/arrendamento`, label: "Arrendamento" },
+      { to: `/grupos/${grupoId}/arrendamento/graficos`, label: "Gráficos" },
       { to: `/grupos/${grupoId}/settings`, label: "Definições" },
     ];
   }
@@ -38,7 +39,7 @@ function LinksGrupo({ grupoId, tipo }: { grupoId: string; tipo: TipoGrupo }) {
   return (
     <>
       {linksPorTipo(grupoId, tipo).map((link) => (
-        <NavLink key={link.to} to={link.to} className={linkClass}>
+        <NavLink key={link.to} to={link.to} end className={linkClass}>
           {link.label}
         </NavLink>
       ))}
@@ -57,7 +58,7 @@ function LinksGrupoMobile({ grupoId, tipo, aoNavegar }: { grupoId: string; tipo:
         ← Grupos
       </Link>
       {linksPorTipo(grupoId, tipo).map((link) => (
-        <NavLink key={link.to} to={link.to} className={linkClassMobile} onClick={aoNavegar}>
+        <NavLink key={link.to} to={link.to} end className={linkClassMobile} onClick={aoNavegar}>
           {link.label}
         </NavLink>
       ))}
